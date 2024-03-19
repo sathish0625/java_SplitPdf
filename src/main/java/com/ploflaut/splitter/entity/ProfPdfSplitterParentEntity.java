@@ -1,6 +1,7 @@
 package com.ploflaut.splitter.entity;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ public class ProfPdfSplitterParentEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID")
 	private int id;
-	@Column(name = "DOC_ID",unique = true)
+	@Column(name = "DOC_ID", unique = true)
 	private String docId;
 	@Column(name = "PARENT_DOCNAME")
 	private String parentDocName;

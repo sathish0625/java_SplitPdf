@@ -14,8 +14,6 @@ public class ProfSplitPdfRequest {
 	
 	@NotBlank(message = "PDF cannot be blank")
 	private String pdf;
-	@NotBlank(message = "docId cannot be blank")
-	private String docId;
 	@NotBlank(message = "parentDocName cannot be blank")
 	private String parentDocName;
 	

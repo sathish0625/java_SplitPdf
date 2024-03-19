@@ -15,22 +15,21 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.google.zxing.ChecksumException;
 import com.google.zxing.FormatException;
-import com.ploflaut.splitter.controller.SplitController;
 import com.ploflaut.splitter.entity.ProfPdfSplitterParentEntity;
 import com.ploflaut.splitter.helper.SplitHelper;
 import com.ploflaut.splitter.model.ProfSplitPdfRequest;
 import com.ploflaut.splitter.model.ProfSplitPdfResponse;
 import com.ploflaut.splitter.repository.ProfSplitterParentRepository;
 import com.proflaut.dms.constant.DMSConstant;
-
 import org.apache.pdfbox.text.PDFTextStripper;
 
 @Service
 public class SplitServiceImpl {
+
+	private static final Logger logger = LogManager.getLogger(SplitServiceImpl.class);
 
 	SplitHelper splitHelper;
 
@@ -56,7 +55,7 @@ public class SplitServiceImpl {
 			if (!barcodePages.isEmpty()) {
 				int startPage = 0;
 				for (Integer barcodePage : barcodePages) {
-					splitHelper.addWatermark(document, "VERITAS");
+					splitHelper.addWatermark(document, "PROFLAUT");
 					if (startPage != barcodePage) {
 						List<ProfSplitPdfResponse> splitResponses = splitHelper.splitPdf(document, startPage,
 								barcodePage);
@@ -113,7 +112,7 @@ public class SplitServiceImpl {
 			// Encode the byte array as Base64 string
 			return Base64.getEncoder().encodeToString(modifiedPdfBytes);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(DMSConstant.PRINTSTACKTRACE, e.getMessage(), e);
 			return null;
 		}
 	}

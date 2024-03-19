@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -16,9 +17,11 @@ import com.ploflaut.splitter.model.ProfSplitPdfRequest;
 import com.ploflaut.splitter.model.ProfSplitPdfResponse;
 import com.ploflaut.splitter.serviceimpl.SplitServiceImpl;
 import com.proflaut.dms.constant.DMSConstant;
+import com.proflaut.dms.repository.ProfUserPropertiesRepository;
 
 @RestController
 @RequestMapping("/split")
+@CrossOrigin
 public class SplitController {
 
 	private static final Logger logger = LogManager.getLogger(SplitController.class);
@@ -31,10 +34,9 @@ public class SplitController {
 	}
 
 	@PostMapping("/splitPdf")
-	public ResponseEntity<List<ProfSplitPdfResponse>> splitPdf(@RequestHeader("token") String token,
-			@RequestBody ProfSplitPdfRequest profSplitPdfRequest) {
-		if (profSplitPdfRequest.getParentDocName().isEmpty() || profSplitPdfRequest.getPdf().isEmpty()
-				|| profSplitPdfRequest.getDocId().isEmpty()) {
+	public ResponseEntity<List<ProfSplitPdfResponse>> splitPdf(@RequestBody ProfSplitPdfRequest profSplitPdfRequest) {
+		
+		if (profSplitPdfRequest.getParentDocName().isEmpty() || profSplitPdfRequest.getPdf().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import org.springframework.stereotype.Component;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
@@ -39,6 +41,12 @@ public class SplitHelper {
 		LocalDateTime currentDateTime = LocalDateTime.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(" dd-MM-yyyy HH:mm ");
 		return currentDateTime.format(formatter);
+	}
+
+	public String generateOTP() {
+		SecureRandom secureRandom = new SecureRandom();
+		int otp = 1000 + secureRandom.nextInt(9000);
+		return String.valueOf(otp);
 	}
 
 	static List<String> barcodeNames = new ArrayList<>();
@@ -85,32 +93,34 @@ public class SplitHelper {
 			}
 			newDocument.save(outputStream);
 		}
-
 		for (String string : barcodeNames) {
 			ProfSplitPdfResponse responses = new ProfSplitPdfResponse();
 			responses.setBarcodeName(string);
 			responses.setPdf(Base64.getEncoder().encodeToString(outputStream.toByteArray()));
 			response.add(responses);
 		}
-
 		return response;
 	}
 
-	@SuppressWarnings("deprecation")
 	public void addWatermark(PDDocument document, String watermarkText) throws IOException {
 		for (int i = 0; i < document.getNumberOfPages(); i++) {
 			PDPage page = document.getPage(i);
 			try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
 					PDPageContentStream.AppendMode.APPEND, true, true)) {
 				contentStream.setFont(PDType1Font.TIMES_ITALIC, 50);
-				contentStream.setNonStrokingColor(new Color(0.9f, 0.9f, 0.9f, 0));
+				// Set transparency for watermark
+				PDExtendedGraphicsState gs = new PDExtendedGraphicsState();
+				gs.setNonStrokingAlphaConstant(0.3f); // Adjust as needed, lower value means more transparent
+				contentStream.setGraphicsStateParameters(gs);
+				// Set the color for watermark
+				contentStream.setNonStrokingColor(200, 200, 200); // Adjust as needed
 				// Set the rotation angle (45 degrees)
 				double angle = Math.PI / 4;
-				double x = 100; // X-coordinate
-				double y = 100; // Y-coordinate
+				double x = 100;
+				double y = 100;
 				// Begin text and set rotation matrix
 				contentStream.beginText();
-				contentStream.setTextRotation(angle, x, y); // Set rotation matrix
+				contentStream.setTextRotation(angle, x, y);
 				// Draw the text
 				contentStream.newLineAtOffset((float) x, (float) y); // Starting position
 				contentStream.showText(watermarkText);
@@ -122,16 +132,17 @@ public class SplitHelper {
 
 	public ProfPdfSplitterParentEntity convertResponseToEntity(Set<String> uniqueBarcodeNames,
 			ProfSplitPdfRequest profSplitPdfRequest) {
+		String docId = generateOTP();
 		ProfPdfSplitterParentEntity parentEntity = new ProfPdfSplitterParentEntity();
-		parentEntity.setDocId(profSplitPdfRequest.getDocId());
 		parentEntity.setParentDocName(profSplitPdfRequest.getParentDocName());
+		parentEntity.setDocId(docId);
 		parentEntity.setCreatedAt(formatCurrentDateTime());
 
 		List<ProfPdfSplitterChildEntity> childEntities = new ArrayList<>();
 		for (String barcodeName : uniqueBarcodeNames) {
 			ProfPdfSplitterChildEntity childEntity = new ProfPdfSplitterChildEntity();
 			childEntity.setDocname(barcodeName);
-			childEntity.setChildDocId(profSplitPdfRequest.getDocId() + "_" + generateRandom());
+			childEntity.setChildDocId(docId + "_" + generateRandom());
 			childEntity.setParentEntity(parentEntity);
 			childEntities.add(childEntity);
 		}
