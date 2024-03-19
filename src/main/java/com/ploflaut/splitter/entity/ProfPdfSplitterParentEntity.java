@@ -23,7 +23,7 @@ public class ProfPdfSplitterParentEntity {
 	private String docId;
 	@Column(name = "PARENT_DOCNAME")
 	private String parentDocName;
-	@Column(name = "CREATEDAT")
+	@Column(name = "CREATED_DATE")
 	private String createdAt;
 
 	@OneToMany(mappedBy = "parentEntity", cascade = CascadeType.ALL)

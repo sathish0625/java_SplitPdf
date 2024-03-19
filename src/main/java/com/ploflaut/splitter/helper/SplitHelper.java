@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -32,6 +34,12 @@ import com.ploflaut.splitter.model.ProfSplitPdfResponse;
 
 @Component
 public class SplitHelper {
+
+	public static String formatCurrentDateTime() {
+		LocalDateTime currentDateTime = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(" dd-MM-yyyy HH:mm ");
+		return currentDateTime.format(formatter);
+	}
 
 	static List<String> barcodeNames = new ArrayList<>();
 
@@ -117,6 +125,7 @@ public class SplitHelper {
 		ProfPdfSplitterParentEntity parentEntity = new ProfPdfSplitterParentEntity();
 		parentEntity.setDocId(profSplitPdfRequest.getDocId());
 		parentEntity.setParentDocName(profSplitPdfRequest.getParentDocName());
+		parentEntity.setCreatedAt(formatCurrentDateTime());
 
 		List<ProfPdfSplitterChildEntity> childEntities = new ArrayList<>();
 		for (String barcodeName : uniqueBarcodeNames) {
